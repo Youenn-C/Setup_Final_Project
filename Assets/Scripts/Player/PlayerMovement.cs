@@ -3,39 +3,10 @@ using Rewired;
 
 public class PlayerMovement : MonoBehaviour
 {
-    //public static PlayerMovement Instance;
-    
-    [Header("References"), Space(5)]
-    [SerializeField] private Rigidbody _playerRigidbody;
-    [SerializeField] private Animator _playerAnimator;
-
-    [Header("Variables"), Space(5)]
-    [SerializeField] private int _playerHealth;
-    [Space(5)]
-    [SerializeField] private float _lateralMovement;
-    [SerializeField] private float _forwardMovement;
-    [SerializeField] private float _playerSpeed;
-    [SerializeField] private float _playerJumpForce;
-    [Space(5)]
-    [SerializeField] private bool _isGrounded;
-    [SerializeField] private bool _isMoving;
-    [SerializeField] private bool _isJumping;
-    [SerializeField] private bool _isCrouching;
-    [SerializeField] private bool _isAlive;
-
-    [Header("Rewired"), Space(5)]
-    [SerializeField] private int _playerID;
-    [HideInInspector] public Player _player;
-
-
-    void Awake()
+    void Start()
     {
-        _player = ReInput.players.GetPlayer(_playerID);
-
-        //if (_player == null)
-        //{
-        //    Instance = this;
-        //}
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
     
     void Update()
@@ -43,40 +14,42 @@ public class PlayerMovement : MonoBehaviour
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // -- MOVEMENT -------------------------------------------------------------------------------------------------
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        // Récupérer les valeurs des axes de mouvement
-        _lateralMovement = _player.GetAxis("Lateral_Movement"); // Mouvement gauche/droite
-        _forwardMovement = _player.GetAxis("Forward_Movement"); // Mouvement avant/arrière
-        Debug.Log("Lateral : " + _lateralMovement + " | Forward : " + _forwardMovement);
-        
-        if (_lateralMovement != 0 || _forwardMovement != 0)
+
+        PlayerBrain.Instance._forwardMovement = PlayerBrain.Instance._player.GetAxis("ForwardMovement");
+        PlayerBrain.Instance._lateralMovement = PlayerBrain.Instance._player.GetAxis("LateralMovement");
+
+        if (PlayerBrain.Instance._forwardMovement != 0 || PlayerBrain.Instance._lateralMovement != 0)
         {
-            _isMoving = true;
+            PlayerBrain.Instance._isMoving = true;
         }
-        else _isMoving = false;
+        else PlayerBrain.Instance._isMoving = false;
         
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // -- JUMP -----------------------------------------------------------------------------------------------------
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-        if (_player.GetButtonDown("Jump"))
+        if (PlayerBrain.Instance._player.GetButtonDown("Jump"))
         {
-            _playerRigidbody.AddForce(Vector3.up * _playerJumpForce, ForceMode.Impulse);
+            PlayerBrain.Instance._playerRigidbody.AddForce(Vector3.up * PlayerBrain.Instance._playerJumpForce, ForceMode.Impulse);
         }
     }
 
     void FixedUpdate()
     {
-        if (_isMoving)
+        if (PlayerBrain.Instance._isMoving)
         {
             // Calculer la direction de déplacement en fonction de l'orientation locale
-            Vector3 moveDirection = (transform.right * _lateralMovement + transform.forward * _forwardMovement).normalized * _playerSpeed;
+            Vector3 moveDirection = (transform.right * PlayerBrain.Instance._lateralMovement + transform.forward * PlayerBrain.Instance._forwardMovement).normalized * PlayerBrain.Instance._playerSpeed;
 
             // Conserver la vélocité verticale pour éviter de perturber le saut ou la gravité
-            moveDirection.y = _playerRigidbody.linearVelocity.y;
+            moveDirection.y = PlayerBrain.Instance._playerRigidbody.linearVelocity.y;
 
             // Appliquer la vélocité basée sur la direction locale et la vitesse de déplacement
-            _playerRigidbody.linearVelocity = moveDirection;
+            PlayerBrain.Instance._playerRigidbody.linearVelocity = moveDirection;
+        }
+        else if (!PlayerBrain.Instance._isMoving)
+        {
+            PlayerBrain.Instance._playerRigidbody.linearVelocity = new Vector3(0, PlayerBrain.Instance._playerRigidbody.linearVelocity.y, 0);
         }
     }
 }
