@@ -3,6 +3,18 @@ using Rewired;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Variables PlayerMovement"), Space(5)]
+    public int playerHealth;
+    [Space(5)]
+    public float lateralMovement;
+    public float forwardMovement;
+    public float playerSpeed;
+    public float playerJumpForce;
+    [Space(5)]
+    public bool isGrounded;
+    public bool isMoving;
+    public bool isJumping;
+    public bool isCrouching;
     void Start()
     {
         Cursor.visible = false;
@@ -15,41 +27,41 @@ public class PlayerMovement : MonoBehaviour
         // -- MOVEMENT -------------------------------------------------------------------------------------------------
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        PlayerBrain.Instance._forwardMovement = PlayerBrain.Instance._player.GetAxis("ForwardMovement");
-        PlayerBrain.Instance._lateralMovement = PlayerBrain.Instance._player.GetAxis("LateralMovement");
+        forwardMovement = PlayerBrain.Instance.player.GetAxis("ForwardMovement");
+        lateralMovement = PlayerBrain.Instance.player.GetAxis("LateralMovement");
 
-        if (PlayerBrain.Instance._forwardMovement != 0 || PlayerBrain.Instance._lateralMovement != 0)
+        if (forwardMovement != 0 || lateralMovement != 0)
         {
-            PlayerBrain.Instance._isMoving = true;
+            isMoving = true;
         }
-        else PlayerBrain.Instance._isMoving = false;
+        else isMoving = false;
         
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // -- JUMP -----------------------------------------------------------------------------------------------------
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-        if (PlayerBrain.Instance._player.GetButtonDown("Jump"))
+        if (PlayerBrain.Instance.player.GetButtonDown("Jump"))
         {
-            PlayerBrain.Instance._playerRigidbody.AddForce(Vector3.up * PlayerBrain.Instance._playerJumpForce, ForceMode.Impulse);
+            PlayerBrain.Instance.playerRigidbody.AddForce(Vector3.up * playerJumpForce, ForceMode.Impulse);
         }
     }
 
     void FixedUpdate()
     {
-        if (PlayerBrain.Instance._isMoving)
+        if (isMoving)
         {
             // Calculer la direction de déplacement en fonction de l'orientation locale
-            Vector3 moveDirection = (transform.right * PlayerBrain.Instance._lateralMovement + transform.forward * PlayerBrain.Instance._forwardMovement).normalized * PlayerBrain.Instance._playerSpeed;
+            Vector3 moveDirection = (transform.right * lateralMovement + transform.forward * forwardMovement).normalized * playerSpeed;
 
             // Conserver la vélocité verticale pour éviter de perturber le saut ou la gravité
-            moveDirection.y = PlayerBrain.Instance._playerRigidbody.linearVelocity.y;
+            moveDirection.y = PlayerBrain.Instance.playerRigidbody.linearVelocity.y;
 
             // Appliquer la vélocité basée sur la direction locale et la vitesse de déplacement
-            PlayerBrain.Instance._playerRigidbody.linearVelocity = moveDirection;
+            PlayerBrain.Instance.playerRigidbody.linearVelocity = moveDirection;
         }
-        else if (!PlayerBrain.Instance._isMoving)
+        else if (!isMoving)
         {
-            PlayerBrain.Instance._playerRigidbody.linearVelocity = new Vector3(0, PlayerBrain.Instance._playerRigidbody.linearVelocity.y, 0);
+            PlayerBrain.Instance.playerRigidbody.linearVelocity = new Vector3(0, PlayerBrain.Instance.playerRigidbody.linearVelocity.y, 0);
         }
     }
 }
