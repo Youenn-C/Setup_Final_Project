@@ -1836,7 +1836,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _grabPoint: {fileID: 3993519729835758336}
-  _grabDistance: 3
+  _grabDistance: 5
   _canGrab: 1
   _isGrabing: 0
 --- !u!114 &6492383975323593014
